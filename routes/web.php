@@ -13,13 +13,13 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified', 'check-role'])->name('dashboard');
+})->middleware(['auth', 'verified', 'check-role:3'])->name('dashboard');
 Route::get('/admin', function () {
     return view('dashboard-admin');
-})->middleware(['auth', 'verified', 'check-role'])->name('admin');
+})->middleware(['auth', 'verified', 'check-role:2'])->name('admin');
 Route::get('/superadmin', function () {
     return view('dashboard-superadmin');
-})->middleware(['auth', 'verified', 'check-role'])->name('superadmin');
+})->middleware(['auth', 'verified', 'check-role:1'])->name('superadmin');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

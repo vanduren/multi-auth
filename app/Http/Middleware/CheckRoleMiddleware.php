@@ -13,27 +13,43 @@ class CheckRoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string $expectedRole): Response
     {
         if (!$request->user()){
             return redirect()->route('login');
         }
-        $uriOrigin = $request->getRequestUri();
+        switch ($expectedRole){
+            case '1':
+                $expectedUri = '/superadmin';
+                break;
+            case '2':
+                $expectedUri = '/admin';
+                break;
+            case '3':
+                $expectedUri = '/dashboard';
+                break;
+            default:
+                $expectedUri = '/';
+        }
+        switch ($request->user()->role){
+            case '1':
+                $allowedUri = '/superadmin';
+                break;
+            case '2':
+                $allowedUri = '/admin';
+                break;
+            case '3':
+                $allowedUri = '/dashboard';
+                break;
+            default:
+                $allowedUri = '/';
+        }
+        $requestedUri = $request->getRequestUri();
         $role = $request->user()->role;
-        if ($role == '3' && $uriOrigin == '/dashboard'){
-            return $next($request);
-        }elseif ($role == '3' && $uriOrigin != '/dashboard'){
-                return redirect()->route('dashboard');
-        }
-        if ($role == '1' && $uriOrigin == '/superadmin'){
-            return $next($request);
-        }elseif ($role == '1' && $uriOrigin != '/superadmin'){
-            return redirect()->route('superadmin');
-        }
-        if ($role == '2' && $uriOrigin == '/admin'){
-            return $next($request);
-        }elseif ($role == '2' && $uriOrigin != '/admin'){
-            return redirect()->route('admin');
+
+        // dd($requestedUri, $expectedUri, $role, $expectedRole, $allowedUri);
+        if (!($role == $expectedRole && $requestedUri == $expectedUri)){
+            return redirect($allowedUri);
         }
         return $next($request);
     }
